@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>HydroElec Track</title>
+    <meta name="description" content="Gestion digitale des dossiers de raccordement Eau & Électricité — fonctionne hors-ligne." />
+    <meta name="theme-color" content="#0066FF" />
+    <meta name="color-scheme" content="light" />
+
+    <!-- PWA : chemins relatifs (sous-dossier GitHub Pages / application native) -->
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="icon" href="./favicon.ico" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="./logo.svg" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="HydroElec" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!--
+      Garde-fou de démarrage (script CLASSIQUE, ES5 : s'exécute même si l'appli ne peut pas se charger).
+      Remplace l'éternel « Chargement… » par une explication claire :
+        - ouverture en double-clic (file://) : les navigateurs interdisent les modules JavaScript dans ce mode ;
+        - fichier de script introuvable / bloqué, ou erreur au démarrage : on affiche la cause réelle.
+      Dès que l'appli démarre, React remplace le contenu de #root et ce bloc disparaît.
+    -->
+    <script>
+      (function () {
+        var done = false;
+        var problems = [];
+
+        function boot() {
+          var root = document.getElementById('root');
+          return root ? root.querySelector('[data-boot]') : null;
+        }
+
+        function panel(title, paragraphs, details) {
+          var el = boot();
+          if (!el || done) return;
+          done = true;
+          el.innerHTML = '';
+          el.setAttribute('style', 'font:17px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#1d2128');
+          var h = document.createElement('h1');
+          h.textContent = title;
+          h.setAttribute('style', 'font-size:22px;margin:0 0 12px;color:#0050cc');
+          el.appendChild(h);
+          for (var i = 0; i < paragraphs.length; i++) {
+            var p = document.createElement('p');
+            p.textContent = paragraphs[i];
+            p.setAttribute('style', 'margin:0 0 12px');
+            el.appendChild(p);
+          }
+          if (details && details.length) {
+            var pre = document.createElement('pre');
+            pre.textContent = details.join('\n');
+            pre.setAttribute('style', 'white-space:pre-wrap;word-break:break-all;background:#f2f6fc;border:1px solid #b9c3d3;border-radius:10px;padding:12px;font-size:13px');
+            el.appendChild(pre);
+          }
+          var b = document.createElement('button');
+          b.textContent = 'Recharger la page';
+          b.setAttribute('style', 'min-height:52px;padding:0 22px;border:0;border-radius:14px;background:#0066ff;color:#fff;font:700 17px system-ui;cursor:pointer');
+          b.onclick = function () { location.reload(); };
+          el.appendChild(b);
+        }
+
+        // 1) Ouvert comme un simple fichier : impossible par conception.
+        if (location.protocol === 'file:') {
+          window.addEventListener('DOMContentLoaded', function () {
+            panel(
+              "Cette page ne peut pas s'ouvrir comme un fichier",
+              [
+                "Vous avez ouvert index.html directement depuis le disque (adresse commençant par « file:// »). Les navigateurs bloquent alors le code de l'application, qui reste bloquée sur « Chargement… ».",
+                "HydroElec Track est une application web : ouvrez-la par son adresse internet (https://…) donnée par l'hébergeur, sur l'ordinateur comme sur les téléphones.",
+                "Le dossier source du projet (celui qui contient « src ») sert uniquement à la fabrication : la version publiée est créée automatiquement par GitHub (voir README, section « Mettre en ligne »)."
+              ]
+            );
+          });
+          return;
+        }
+
+        // 2) Fichier de l'appli introuvable / bloqué, ou erreur JavaScript au démarrage.
+        window.addEventListener('error', function (e) {
+          var t = e.target;
+          if (t && (t.tagName === 'SCRIPT' || t.tagName === 'LINK')) {
+            problems.push('Fichier introuvable ou bloqué : ' + (t.src || t.href));
+          } else if (e.message) {
+            problems.push('Erreur JavaScript : ' + e.message + (e.filename ? ' (' + e.filename + ':' + e.lineno + ')' : ''));
+          }
+        }, true);
+        window.addEventListener('unhandledrejection', function (e) {
+          problems.push('Erreur : ' + ((e.reason && (e.reason.message || e.reason)) || 'inconnue'));
+        });
+
+        setTimeout(function () {
+          if (!boot()) return; // l'appli a démarré
+          panel(
+            "L'application n'a pas pu démarrer",
+            [
+              "Le chargement dure anormalement longtemps. Vérifiez votre connexion puis rechargez la page. Si le message revient, communiquez le détail ci-dessous à l'administrateur.",
+              "Cause fréquente : la page est servie par un hébergeur qui n'a pas reçu tous les fichiers (dossier « assets » manquant), ou un très ancien navigateur."
+            ],
+            problems.length ? problems.slice(0, 6) : ['(aucune erreur détectée : réseau lent ou navigateur trop ancien)']
+          );
+        }, 8000);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root">
+      <div data-boot style="font:17px system-ui;padding:24px;color:#1d2128">Chargement de HydroElec Track…</div>
+    </div>
+    <noscript>HydroElec Track nécessite JavaScript.</noscript>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

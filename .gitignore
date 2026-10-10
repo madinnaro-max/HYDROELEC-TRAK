@@ -1,0 +1,32 @@
+# Dépendances et compilation
+node_modules/
+dist/
+*.log
+
+# Secrets — ne jamais publier
+.env
+.env.*
+!.env.example
+server/.env
+*.jks
+*.keystore
+google-services.json
+GoogleService-Info.plist
+*.p12
+*.mobileprovision
+
+# Données du serveur (base SQLite + pièces jointes)
+server/data/
+*.db
+*.db-wal
+*.db-shm
+
+# Projets natifs : régénérés par « cap add » (le CI le fait) — décommentez si vous les versionnez
+android/
+ios/
+
+# Outils / systèmes
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

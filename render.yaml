@@ -1,0 +1,32 @@
+# Déploiement « un seul lien » sur Render (https://render.com) : UN service Docker qui sert l'appli web ET l'API.
+# Mode d'emploi : README.md → « Mettre en ligne en 10 minutes ».
+#
+# Pourquoi payant : la base (SQLite) et les photos doivent survivre aux redémarrages → disque persistant,
+# réservé aux offres payantes de Render. Une offre gratuite effacerait les dossiers.
+# (Tout hébergeur Docker équivalent convient : Railway, Fly.io, un VPS… — voir README.)
+services:
+  - type: web
+    name: hydroelec-track
+    runtime: docker
+    dockerfilePath: ./server/Dockerfile
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /api/health
+    autoDeploy: true
+    disk:
+      name: hydroelec-data
+      mountPath: /data
+      sizeGB: 2
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATA_DIR
+        value: /data
+      - key: JWT_SECRET
+        generateValue: true # secret aléatoire créé par Render
+      - key: ADMIN_MATRICULE
+        value: ADMIN
+      - key: ADMIN_PASSWORD
+        sync: false # Render vous le demande à la création : choisissez un mot de passe solide
+      - key: JWT_EXPIRES_IN
+        value: 7d
